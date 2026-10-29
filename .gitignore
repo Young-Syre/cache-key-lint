@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+npm-debug.log*
+.DS_Store
+.env
+.env.*
+
+# Never commit a capture taken from a real deployment: HAR files carry live
+# session cookies and Authorization headers. Only the fabricated fixtures and
+# examples in this repository are tracked.
+*.har
+!examples/*.har

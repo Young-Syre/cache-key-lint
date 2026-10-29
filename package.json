@@ -1,0 +1,56 @@
+{
+  "name": "cache-key-lint",
+  "version": "0.1.0",
+  "description": "Offline web-cache key inference and cache-poisoning/deception linter for HAR captures.",
+  "license": "MIT",
+  "author": "David Nichols",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "cache-key-lint": "dist/src/cli.js"
+  },
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "cache-poisoning",
+    "cache-deception",
+    "web-cache",
+    "cache-key",
+    "har",
+    "appsec",
+    "security",
+    "bug-bounty"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Young-Syre/cache-key-lint.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Young-Syre/cache-key-lint/issues"
+  },
+  "homepage": "https://github.com/Young-Syre/cache-key-lint#readme",
+  "scripts": {
+    "build": "tsc --build --force",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
