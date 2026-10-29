@@ -9,7 +9,7 @@
 
 ---
 
-## Why this bug class exists
+## The key is never the whole request
 
 A cache stores a response under a *key*, and the key is almost never the whole request.
 
