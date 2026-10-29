@@ -1,0 +1,504 @@
+{
+  "label": "unkeyed-query-cookie-and-directives",
+  "note": "Fabricated capture exercising the query, cookie, method, Range, fat-GET and Cache-Control rules.",
+  "entries": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/search?q=shoes&lang=en",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=60"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Results for shoes</h1><p>Showing 12 results in English.</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/search?q=shoes&lang=de",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=60"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Ergebnisse fuer shoes</h1><p>12 Ergebnisse auf Deutsch.</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/search?lang=en&q=shoes",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=60"
+          },
+          {
+            "name": "X-Cache",
+            "value": "HIT"
+          },
+          {
+            "name": "Age",
+            "value": "22"
+          }
+        ],
+        "body": "<h1>Results for shoes</h1><p>Showing 12 results in English.</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/profile",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Cookie",
+            "value": "session=FIXTURE-USER-A; theme=dark"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "private, max-age=600"
+          },
+          {
+            "name": "X-Vercel-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Profile</h1><p>Signed in as Ada Example</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/profile",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Cookie",
+            "value": "session=FIXTURE-USER-D; theme=dark"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "private, max-age=600"
+          },
+          {
+            "name": "X-Vercel-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Profile</h1><p>Signed in as Dee Example</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "HEAD",
+        "url": "https://www.example/report.pdf",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/pdf"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, s-maxage=3600, max-age=0, stale-while-revalidate=600"
+          }
+        ],
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/report.pdf",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Range",
+            "value": "bytes=0-99"
+          }
+        ]
+      },
+      "response": {
+        "status": 206,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/pdf"
+          },
+          {
+            "name": "Content-Range",
+            "value": "bytes 0-99/20480"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ],
+        "body": "%PDF-1.7 first hundred bytes"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/graph?op=stats",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{\"filter\":\"mine\"}"
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=30"
+          }
+        ],
+        "body": "{\"scope\":\"mine\",\"count\":4}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/graph?op=stats",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{\"filter\":\"all\"}"
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=30"
+          }
+        ],
+        "body": "{\"scope\":\"all\",\"count\":912}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/legacy",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Pragma",
+            "value": "no-cache"
+          }
+        ],
+        "body": "<h1>Legacy page</h1>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/status.json",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{\"ok\":true}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/experiments",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "name": "Vary",
+            "value": "*"
+          }
+        ],
+        "body": "<h1>Experiments</h1>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/device",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "User-Agent",
+            "value": "ckl-fixture/1.0"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "name": "Vary",
+            "value": "User-Agent"
+          }
+        ],
+        "body": "<h1>Device page</h1>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/device",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "User-Agent",
+            "value": "ckl-fixture/2.0 (other)"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "name": "Vary",
+            "value": "User-Agent"
+          }
+        ],
+        "body": "<h1>Device page</h1>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example//profile",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Cookie",
+            "value": "session=FIXTURE-USER-A; theme=dark"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "private, max-age=600"
+          },
+          {
+            "name": "X-Vercel-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Profile</h1><p>Signed in as Ada Example</p>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.example/billing",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "www.example"
+          },
+          {
+            "name": "Authorization",
+            "value": "Bearer FIXTURE-TOKEN-A"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "no-cache"
+          },
+          {
+            "name": "X-Vercel-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<h1>Billing</h1><p>Signed in as Ada Example</p><p>Balance: 42.00 GBP</p>"
+      }
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "label": "unkeyed-x-forwarded-host",
+  "note": "Fabricated capture. Two observations of the home page differing only in X-Forwarded-Host, and two of /login differing only in Forwarded.",
+  "entries": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://shop.example/",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "shop.example"
+          },
+          {
+            "name": "Accept",
+            "value": "text/html"
+          },
+          {
+            "name": "Accept-Encoding",
+            "value": "gzip"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS from edge-1"
+          }
+        ],
+        "body": "<!doctype html><html><head>\n<title>Example Shop</title>\n<link rel=\"canonical\" href=\"https://shop.example/\">\n<meta property=\"og:url\" content=\"https://shop.example/\">\n<script src=\"//cdn.shop.example/app.1f3a9c2b4d5e6f70.js\"></script>\n</head><body><h1>Example Shop</h1><p>Trainers, boots and sandals.</p></body></html>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://shop.example/",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "shop.example"
+          },
+          {
+            "name": "Accept",
+            "value": "text/html"
+          },
+          {
+            "name": "Accept-Encoding",
+            "value": "gzip"
+          },
+          {
+            "name": "X-Forwarded-Host",
+            "value": "cache-poison.invalid"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=300"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS from edge-1"
+          }
+        ],
+        "body": "<!doctype html><html><head>\n<title>Example Shop</title>\n<link rel=\"canonical\" href=\"https://cache-poison.invalid/\">\n<meta property=\"og:url\" content=\"https://cache-poison.invalid/\">\n<script src=\"//cdn.cache-poison.invalid/app.1f3a9c2b4d5e6f70.js\"></script>\n</head><body><h1>Example Shop</h1><p>Trainers, boots and sandals.</p></body></html>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://shop.example/login",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "shop.example"
+          },
+          {
+            "name": "Accept",
+            "value": "text/html"
+          }
+        ]
+      },
+      "response": {
+        "status": 302,
+        "headers": [
+          {
+            "name": "Location",
+            "value": "https://shop.example/dashboard"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=60"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS from edge-1"
+          }
+        ],
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://shop.example/login",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "shop.example"
+          },
+          {
+            "name": "Accept",
+            "value": "text/html"
+          },
+          {
+            "name": "Forwarded",
+            "value": "host=cache-poison.invalid;proto=https"
+          }
+        ]
+      },
+      "response": {
+        "status": 302,
+        "headers": [
+          {
+            "name": "Location",
+            "value": "https://cache-poison.invalid/dashboard"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=60"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS from edge-1"
+          }
+        ],
+        "body": ""
+      }
+    }
+  ]
+}

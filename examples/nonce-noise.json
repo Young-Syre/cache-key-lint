@@ -1,0 +1,90 @@
+{
+  "label": "nonce-noise",
+  "note": "Fabricated capture whose two observations differ only in per-response noise: a CSP nonce, a CSRF token, a timestamp, a build hash and a request id. Nothing here should be reported as a variation.",
+  "entries": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://status.example/overview",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "status.example"
+          },
+          {
+            "name": "Accept-Encoding",
+            "value": "gzip"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=120"
+          },
+          {
+            "name": "Vary",
+            "value": "Accept-Encoding"
+          },
+          {
+            "name": "X-Cache",
+            "value": "MISS"
+          }
+        ],
+        "body": "<!doctype html><html><head><meta http-equiv=\"Content-Security-Policy\" content=\"script-src 'nonce-r4nd0mA1'\"><meta name=\"csrf-token\" content=\"a1b2c3d4e5f60718\"><script nonce=\"r4nd0mA1\" src=\"/assets/app.1f3a9c2b4d5e6f70.js\"></script></head><body><h1>Service status</h1><p>All systems nominal.</p><p>Generated 2026-01-14T09:12:00Z</p><!-- request_id: req-4a7c91d2 --></body></html>"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://status.example/overview",
+        "headers": [
+          {
+            "name": "Host",
+            "value": "status.example"
+          },
+          {
+            "name": "Accept-Encoding",
+            "value": "gzip"
+          },
+          {
+            "name": "X-Forwarded-Host",
+            "value": "cache-poison.invalid"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          },
+          {
+            "name": "Cache-Control",
+            "value": "public, max-age=120"
+          },
+          {
+            "name": "Vary",
+            "value": "Accept-Encoding"
+          },
+          {
+            "name": "X-Cache",
+            "value": "HIT"
+          },
+          {
+            "name": "Age",
+            "value": "17"
+          }
+        ],
+        "body": "<!doctype html><html><head><meta http-equiv=\"Content-Security-Policy\" content=\"script-src 'nonce-Z9zQ8pL2'\"><meta name=\"csrf-token\" content=\"99887766554433aa\"><script nonce=\"Z9zQ8pL2\" src=\"/assets/app.8e7d6c5b4a392817.js\"></script></head><body><h1>Service status</h1><p>All systems nominal.</p><p>Generated 2026-01-14T09:14:02Z</p><!-- request_id: req-c0ffee11 --></body></html>"
+      }
+    }
+  ]
+}

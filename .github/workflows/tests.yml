@@ -1,0 +1,120 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['20', '22', '24']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # No lockfile install step and no `npm ci`: the package has no runtime
+      # dependencies, only TypeScript and @types/node for the build.
+      - name: Install build tooling
+        run: npm install --no-audit --no-fund
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run the test suite
+        run: node --test "dist/test/*.test.js"
+
+      # The CLI assertions below are deliberately separate from the suite: they
+      # exercise the published entry point and the documented exit codes, which
+      # is what a user actually depends on.
+      - name: CLI — the poisonable capture is reported and exits 1
+        run: |
+          set +e
+          out=$(node dist/src/cli.js examples/unkeyed-x-forwarded-host.json)
+          code=$?
+          set -e
+          echo "$out"
+          test "$code" = "1" || { echo "expected exit 1, got $code"; exit 1; }
+          echo "$out" | grep -q 'CKL-U001' || { echo 'CKL-U001 not reported'; exit 1; }
+          echo "$out" | grep -q 'CKL-U002' || { echo 'CKL-U002 not reported'; exit 1; }
+
+      - name: CLI — the deception capture is reported and exits 1
+        run: |
+          set +e
+          out=$(node dist/src/cli.js examples/css-suffix-deception.har)
+          code=$?
+          set -e
+          echo "$out"
+          test "$code" = "1" || { echo "expected exit 1, got $code"; exit 1; }
+          for rule in CKL-D001 CKL-D002 CKL-D003 CKL-D004 CKL-E001 CKL-E002; do
+            echo "$out" | grep -q "$rule" || { echo "$rule not reported"; exit 1; }
+          done
+
+      - name: CLI — a correctly configured capture comes back clean and exits 0
+        run: |
+          out=$(node dist/src/cli.js examples/clean-well-configured.json)
+          echo "$out"
+          echo "$out" | grep -q 'FINDINGS (0)' || { echo 'expected no findings'; exit 1; }
+
+      - name: CLI — a nonce-only difference is not reported
+        run: |
+          out=$(node dist/src/cli.js examples/nonce-noise.json)
+          echo "$out"
+          echo "$out" | grep -q 'FINDINGS (0)' || { echo 'nonce noise was reported as a variation'; exit 1; }
+
+      - name: CLI — --fail-on critical does not trip on a medium-only capture
+        run: node dist/src/cli.js examples/unkeyed-query-cookie-and-directives.json --fail-on critical >/dev/null
+
+      - name: CLI — --fail-on never always exits 0
+        run: node dist/src/cli.js examples/css-suffix-deception.har --fail-on never >/dev/null
+
+      - name: CLI — exit 2 on a missing capture and on an unknown flag
+        run: |
+          set +e
+          node dist/src/cli.js ./no-such-capture.json >/dev/null 2>&1
+          test "$?" = "2" || { echo 'expected exit 2 for a missing file'; exit 1; }
+          node dist/src/cli.js --nonsense >/dev/null 2>&1
+          test "$?" = "2" || { echo 'expected exit 2 for an unknown flag'; exit 1; }
+          node dist/src/cli.js >/dev/null 2>&1
+          test "$?" = "2" || { echo 'expected exit 2 when no capture is given'; exit 1; }
+          set -e
+
+      - name: CLI — no fixture credential appears in any output format
+        run: |
+          for fmt in text json markdown; do
+            out=$(node dist/src/cli.js examples/*.json examples/*.har --format "$fmt" --fail-on never)
+            for secret in FIXTURE-USER-A FIXTURE-USER-B FIXTURE-USER-C FIXTURE-USER-D FIXTURE-TOKEN-A; do
+              if echo "$out" | grep -q "$secret"; then
+                echo "$fmt output leaked $secret"; exit 1
+              fi
+            done
+          done
+
+      - name: CLI — plan emits a cache-buster on every probe
+        run: |
+          node dist/src/cli.js plan examples/css-suffix-deception.har \
+            --url https://app.example/account --format json -o plan.json
+          node --input-type=commonjs -e '
+            const plan = JSON.parse(require("fs").readFileSync("plan.json", "utf8"));
+            const bad = plan.probes.filter((p) => !p.url.includes("cklcb="));
+            if (bad.length > 0) { console.error("probes without a buster:", bad.length); process.exit(1); }
+            if (plan.probes.length < 30) { console.error("matrix too small"); process.exit(1); }
+            console.log(plan.probes.length + " probes, every one carrying a cache-buster");
+          '
+          rm -f plan.json
+
+      - name: CLI — rules and normalisers print
+        run: |
+          node dist/src/cli.js rules
+          node dist/src/cli.js rules --format markdown
+          node dist/src/cli.js normalisers
