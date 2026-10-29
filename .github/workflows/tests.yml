@@ -32,7 +32,7 @@ jobs:
         run: npm run build
 
       - name: Run the test suite
-        run: node --test "dist/test/*.test.js"
+        run: node --test dist/test/*.test.js
 
       # The CLI assertions below are deliberately separate from the suite: they
       # exercise the published entry point and the documented exit codes, which
