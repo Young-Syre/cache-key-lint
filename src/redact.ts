@@ -18,6 +18,14 @@ import type { CaptureEntry, HeaderPair } from './types.js';
 
 export const REDACTED = '<redacted>';
 
+/**
+ * Headers whose value is a URL, so its query and fragment are harvested for
+ * credentials. These are not credential headers themselves -- they are kept
+ * in a report because they affect routing and caching -- which is why they
+ * have to be listed separately from CREDENTIAL_HEADERS.
+ */
+export const URL_VALUED_HEADERS: readonly string[] = ['referer', 'location', 'content-location'];
+
 /** Query parameters whose value is a credential rather than a cache input. */
 export const CREDENTIAL_QUERY_PARAMS: readonly string[] = [
   'access_token',
@@ -80,8 +88,28 @@ export class Redactor {
       const t = v.trim();
       if (t !== '') literals.add(t);
     };
+    // A URL's query *and* fragment. The fragment matters because an OAuth
+    // implicit-flow redirect puts `access_token` after the `#`, and that is
+    // exactly what a captured `Location` header carries.
+    const addFromUrl = (url: string): void => {
+      const start = url.search(/[?#]/);
+      if (start === -1) return;
+      for (const part of url.slice(start + 1).split(/[&;?#]/)) {
+        const eq = part.indexOf('=');
+        if (eq <= 0) continue;
+        if (!CREDENTIAL_QUERY_PARAMS.includes(part.slice(0, eq).toLowerCase())) continue;
+        add(decodeURIComponent(part.slice(eq + 1)));
+        add(part.slice(eq + 1));
+      }
+    };
     for (const e of entries) {
       for (const h of [...e.request.headers, ...e.response.headers]) {
+        // Harvested before the credential-header test, not inside it: these
+        // headers are not credentials, they are URLs that carry one. A token
+        // in a `Referer` used to reach the literal set from nowhere, so the
+        // same value echoed in a response body was rendered verbatim even
+        // though the identical token in `request.url` was redacted.
+        if (URL_VALUED_HEADERS.includes(h.lower)) addFromUrl(h.value);
         if (!CREDENTIAL_HEADERS.includes(h.lower)) continue;
         if (h.lower === 'cookie' || h.lower === 'set-cookie') {
           for (const p of cookiePairs(h.value)) add(p.value);
@@ -94,17 +122,7 @@ export class Redactor {
         }
         add(h.value);
       }
-      const q = e.request.url.indexOf('?');
-      if (q !== -1) {
-        for (const part of e.request.url.slice(q + 1).split(/[&;]/)) {
-          const eq = part.indexOf('=');
-          if (eq <= 0) continue;
-          if (CREDENTIAL_QUERY_PARAMS.includes(part.slice(0, eq).toLowerCase())) {
-            add(decodeURIComponent(part.slice(eq + 1)));
-            add(part.slice(eq + 1));
-          }
-        }
-      }
+      addFromUrl(e.request.url);
     }
     return new Redactor(enabled, literals);
   }

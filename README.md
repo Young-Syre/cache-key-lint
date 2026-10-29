@@ -417,7 +417,13 @@ A capture of an authenticated session is a credential store, and reports get pas
 - `Cookie: session=…; theme=…` is printed as `session=<redacted>; theme=<redacted>`.
 - `Authorization: Bearer …` keeps its scheme: `Bearer <redacted>`.
 - `Set-Cookie` keeps its name and its attributes.
-- Every credential value found anywhere in the loaded captures is then stripped from all output as a literal, which is what makes the guarantee hold when a token has been echoed into a body or a URL.
+- Every credential value found anywhere in the loaded captures is then stripped
+  from all output as a literal, which is what makes the guarantee hold when a
+  token has been echoed into a body or a URL. "Anywhere" includes the query
+  *and fragment* of a URL carried in a `Referer`, `Location` or
+  `Content-Location` header — those headers are kept because they affect
+  routing and caching, and an OAuth implicit-flow redirect puts
+  `access_token` after the `#` of exactly such a `Location`.
 
 `--no-redact` prints values verbatim and says so in the report header. A test asserts that no fixture credential appears in the text, JSON or markdown output of every shipped example by default, and CI asserts the same against the built CLI.
 

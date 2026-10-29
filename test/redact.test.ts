@@ -5,6 +5,7 @@ import { analyse } from '../src/analyse.js';
 import { formatReport } from '../src/format.js';
 import { makeHeader } from '../src/headers.js';
 import { REDACTED, Redactor } from '../src/redact.js';
+import type { CaptureEntry, HeaderPair } from '../src/types.js';
 import { exampleEntries } from './helpers.js';
 
 /** Credential values that appear in the shipped fixtures. */
@@ -122,4 +123,57 @@ test('--no-redact genuinely disables redaction', () => {
   assert.equal(report.redacted, false);
   const text = formatReport(report, 'text');
   assert.ok(text.includes('REDACTION DISABLED'));
+});
+
+test('a credential in a URL-valued header reaches the literal set', () => {
+  // Referer, Location and Content-Location are not credential headers -- they
+  // are kept because they affect routing and caching -- so they were not
+  // harvested, and a token that arrived only in one of them was absent from
+  // the literal set. The same token echoed in a response body was then
+  // rendered verbatim, while the identical token in `request.url` was
+  // redacted. The fragment case is the sharp one: an OAuth implicit-flow
+  // redirect puts `access_token` after the `#`, and that is what `Location`
+  // carries.
+  const TOKEN = 'URLHEADER-TOKEN-0123456789';
+  const url = 'https://api.example.test/resource';
+  const entry = (
+    requestHeaders: HeaderPair[],
+    responseHeaders: HeaderPair[],
+  ): CaptureEntry => ({
+    index: 1,
+    source: 'unit.har',
+    request: { method: 'GET', url, headers: requestHeaders, body: null },
+    response: { status: 200, headers: responseHeaders, body: null },
+  });
+
+  const cases: [string, CaptureEntry][] = [
+    ['Referer query', entry([makeHeader('Referer', `https://login.example.test/cb?access_token=${TOKEN}`)], [])],
+    ['Location fragment', entry([], [makeHeader('Location', `https://app.example.test/cb#access_token=${TOKEN}`)])],
+    ['Location query', entry([], [makeHeader('Location', `https://app.example.test/cb?id_token=${TOKEN}`)])],
+    ['Content-Location query', entry([], [makeHeader('Content-Location', `https://app.example.test/r?api_key=${TOKEN}`)])],
+  ];
+
+  for (const [label, one] of cases) {
+    const r = Redactor.fromEntries([one], true);
+    assert.equal(r.text(`echoed back: ${TOKEN}`), `echoed back: ${REDACTED}`, label);
+  }
+});
+
+test('a non-credential query parameter in a URL-valued header is not redacted', () => {
+  // The harvest is driven by the parameter name, so an ordinary cache input
+  // must survive it -- otherwise the tool would redact the very values it
+  // exists to report on.
+  const entry: CaptureEntry = {
+    index: 1,
+    source: 'unit.har',
+    request: {
+      method: 'GET',
+      url: 'https://api.example.test/resource',
+      headers: [makeHeader('Referer', 'https://login.example.test/cb?utm_campaign=SPRINGSALE2026X')],
+      body: null,
+    },
+    response: { status: 200, headers: [], body: null },
+  };
+  const r = Redactor.fromEntries([entry], true);
+  assert.equal(r.text('campaign SPRINGSALE2026X'), 'campaign SPRINGSALE2026X');
 });
